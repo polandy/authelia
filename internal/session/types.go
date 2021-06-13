@@ -3,6 +3,7 @@ package session
 import (
 	"time"
 
+	"github.com/duo-labs/webauthn/webauthn"
 	"github.com/fasthttp/session/v2"
 	"github.com/fasthttp/session/v2/providers/redis"
 	"github.com/tstranex/u2f"
@@ -36,6 +37,9 @@ type UserSession struct {
 	KeepMeLoggedIn      bool
 	AuthenticationLevel authentication.Level
 	LastActivity        int64
+
+	WebAuthnCredential  *webauthn.Credential
+	WebAuthnSessionData *webauthn.SessionData
 
 	// The challenge generated in first step of U2F registration (after identity verification) or authentication.
 	// This is used reused in the second phase to check that the challenge has been completed.

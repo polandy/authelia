@@ -1,5 +1,3 @@
-import U2fApi from "u2f-api";
-
 import {
     InitiateTOTPRegistrationPath,
     CompleteTOTPRegistrationPath,
@@ -26,20 +24,10 @@ export async function initiateU2FRegistrationProcess() {
     return PostWithOptionalResponse(InitiateU2FRegistrationPath);
 }
 
-interface U2RRegistrationStep1Response {
-    appId: string;
-    registerRequests: [
-        {
-            version: string;
-            challenge: string;
-        },
-    ];
-}
-
 export async function completeU2FRegistrationProcessStep1(processToken: string) {
-    return Post<U2RRegistrationStep1Response>(CompleteU2FRegistrationStep1Path, { token: processToken });
+    return Post<CredentialCreationOptions>(CompleteU2FRegistrationStep1Path, { token: processToken });
 }
 
-export async function completeU2FRegistrationProcessStep2(response: U2fApi.RegisterResponse) {
+export async function completeU2FRegistrationProcessStep2(response: Credential) {
     return PostWithOptionalResponse(CompleteU2FRegistrationStep2Path, response);
 }

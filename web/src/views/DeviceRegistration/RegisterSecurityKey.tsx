@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 
 import { makeStyles, Typography, Button } from "@material-ui/core";
 import { useHistory, useLocation } from "react-router";
-import u2fApi from "u2f-api";
 
 import FingerTouchIcon from "../../components/FingerTouchIcon";
 import { useNotifications } from "../../hooks/NotificationsContext";
@@ -12,6 +11,7 @@ import {
     completeU2FRegistrationProcessStep1,
     completeU2FRegistrationProcessStep2,
 } from "../../services/RegisterDevice";
+import { bufferEncode, bufferDecode } from "../../utils/Buffer";
 import { extractIdentityToken } from "../../utils/IdentityToken";
 
 const RegisterSecurityKey = function () {
@@ -33,18 +33,31 @@ const RegisterSecurityKey = function () {
         }
         try {
             setRegistrationInProgress(true);
-            const res = await completeU2FRegistrationProcessStep1(processToken);
-            const registerRequests: u2fApi.RegisterRequest[] = [];
-            for (var i in res.registerRequests) {
-                const r = res.registerRequests[i];
-                registerRequests.push({
-                    appId: res.appId,
-                    challenge: r.challenge,
-                    version: r.version,
-                });
+            const credentialCreationOptions = await completeU2FRegistrationProcessStep1(processToken);
+            if (credentialCreationOptions.publicKey) {
+                credentialCreationOptions.publicKey.challenge = bufferDecode(
+                    credentialCreationOptions.publicKey.challenge,
+                );
+                credentialCreationOptions.publicKey.user.id = bufferDecode(credentialCreationOptions.publicKey.user.id);
             }
-            const registerResponse = await u2fApi.register(registerRequests, [], 60);
-            await completeU2FRegistrationProcessStep2(registerResponse);
+
+            const credential = (await navigator.credentials.create({
+                publicKey: credentialCreationOptions.publicKey,
+            })) as any;
+            const attestationObject = credential.response.attestationObject;
+            const clientDataJSON = credential.response.clientDataJSON;
+            const rawId = credential.rawId;
+            const payload = {
+                id: credential.id,
+                rawId: bufferEncode(rawId),
+                type: credential.type,
+                response: {
+                    attestationObject: bufferEncode(attestationObject),
+                    clientDataJSON: bufferEncode(clientDataJSON),
+                },
+            };
+
+            await completeU2FRegistrationProcessStep2(payload);
             setRegistrationInProgress(false);
             history.push(FirstFactorPath);
         } catch (err) {

@@ -2,6 +2,8 @@ module github.com/authelia/authelia
 
 go 1.16
 
+replace github.com/duo-labs/webauthn => github.com/authelia/webauthn v0.0.0-20210608224106-a2ed70bd78b4
+
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Gurpartap/logrus-stack v0.0.0-20170710170904-89c00d8a28f4
@@ -9,6 +11,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/deckarep/golang-set v1.7.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43
 	github.com/duosecurity/duo_api_golang v0.0.0-20201112143038-0e07e9f869e3
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/fasthttp/router v1.3.14
